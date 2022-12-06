@@ -1,5 +1,4 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import axios from "axios";
 import mongoose from "mongoose";
 
 import { ClientData } from "../model/ClientData";
@@ -12,10 +11,14 @@ export const getClientData = async (
     const uri = process.env.DATABASE_URL || "mongodb://localhost:27017/test";
     await mongoose.connect(uri);
 
-    const { data } = await axios.get("https://ipinfo.io/json");
+    const ip =
+      request.headers["x-forwarded-for"] || request.socket.remoteAddress;
+
     const dataToSave = {
       time: new Date(),
-      clientInfo: data,
+      clientInfo: {
+        ip,
+      },
     };
 
     const clientData = new ClientData(dataToSave);
